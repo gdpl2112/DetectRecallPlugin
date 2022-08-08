@@ -1,0 +1,8 @@
+grantedPermissionMap: 
+  '*:*': 
+    - console
+  'io.github.kloping.DetectRecallPlugin:monitor': 
+    - 'g*'
+    - 'f*'
+  'io.github.kloping.DetectRecallPlugin:receiver': 
+    - u3474006766
