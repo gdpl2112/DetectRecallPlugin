@@ -13,6 +13,7 @@ import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.SimpleListenerHost;
 import net.mamoe.mirai.event.events.FriendMessageEvent;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.MessageEvent;
 import net.mamoe.mirai.event.events.MessageRecallEvent;
 import net.mamoe.mirai.message.data.*;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +27,8 @@ import java.util.concurrent.TimeUnit;
  * @author github.kloping
  */
 public class ListenHost extends SimpleListenerHost implements Runnable {
-    private Map<Integer, Message> msMap = new HashMap<>();
+    private List<MessageEvent> events = new ArrayList<>();
+
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     public ListenHost() {
@@ -36,9 +38,10 @@ public class ListenHost extends SimpleListenerHost implements Runnable {
     @Override
     public void run() {
         int max = ConfigData.INSTANCE.getMil() * 60;
-        Iterator<Integer> iterator = msMap.keySet().iterator();
+        Iterator<MessageEvent> iterator = events.iterator();
         while (iterator.hasNext()) {
-            int time = iterator.next();
+            MessageEvent event = iterator.next();
+            int time = event.getTime();
             time += max;
             if (time < System.currentTimeMillis() / 1000)
                 iterator.remove();
@@ -52,7 +55,7 @@ public class ListenHost extends SimpleListenerHost implements Runnable {
 
     @EventHandler
     public void onMessage(GroupMessageEvent event) {
-        msMap.put(event.getTime(), event.getMessage());
+        events.add(event);
         Group group = event.getGroup();
         if (PermissionService.hasPermission(new AbstractPermitteeId.ExactGroup(group.getId()), DetectRecallPlugin.INSTANCE.monitorPerm)) {
             FlashImage flashImage = getFlashImage(event.getMessage());
@@ -70,7 +73,7 @@ public class ListenHost extends SimpleListenerHost implements Runnable {
 
     @EventHandler
     public void onMessage(FriendMessageEvent event) {
-        msMap.put(event.getTime(), event.getMessage());
+        events.add(event);
         Friend friend = event.getFriend();
         if (PermissionService.hasPermission(new AbstractPermitteeId.ExactFriend(friend.getId()), DetectRecallPlugin.INSTANCE.monitorPerm)) {
             FlashImage flashImage = getFlashImage(event.getMessage());
@@ -96,12 +99,11 @@ public class ListenHost extends SimpleListenerHost implements Runnable {
 
     @EventHandler
     public void onMessage(MessageRecallEvent.GroupRecall event) {
-        int time = event.getMessageTime();
-        if (msMap.containsKey(time)) {
-            Message m0 = msMap.get(time);
-            Member member = event.getOperator();
-            Group group = event.getGroup();
-            if (PermissionService.hasPermission(new AbstractPermitteeId.ExactGroup(group.getId()), DetectRecallPlugin.INSTANCE.monitorPerm)) {
+        Group group = event.getGroup();
+        Member member = event.getOperator();
+        if (PermissionService.hasPermission(new AbstractPermitteeId.ExactGroup(group.getId()), DetectRecallPlugin.INSTANCE.monitorPerm)) {
+            Message m0 = getMessage(event);
+            if (m0 != null) {
                 MessageChainBuilder builder = new MessageChainBuilder();
                 builder.append("'").append(member.getNameCard()).append("(" + member.getId() + ")").append("'在群聊'").append(event.getGroup().getName())
                         .append("(" + group.getId() + ")'撤回消息:").append(m0);
@@ -115,11 +117,10 @@ public class ListenHost extends SimpleListenerHost implements Runnable {
 
     @EventHandler
     public void onMessage(MessageRecallEvent.FriendRecall event) {
-        int time = event.getMessageTime();
-        if (msMap.containsKey(time)) {
-            Message m0 = msMap.get(time);
-            Friend friend = event.getAuthor();
-            if (PermissionService.hasPermission(new AbstractPermitteeId.ExactFriend(friend.getId()), DetectRecallPlugin.INSTANCE.monitorPerm)) {
+        Friend friend = event.getAuthor();
+        if (PermissionService.hasPermission(new AbstractPermitteeId.ExactFriend(friend.getId()), DetectRecallPlugin.INSTANCE.monitorPerm)) {
+            Message m0 = getMessage(event);
+            if (m0 != null) {
                 MessageChainBuilder builder = new MessageChainBuilder();
                 builder.append("'").append(friend.getNick()).append("(" + friend.getId() + ")'在私聊").append("撤回了:").append(m0);
                 Message message = builder.build();
@@ -128,6 +129,19 @@ public class ListenHost extends SimpleListenerHost implements Runnable {
                 }
             }
         }
+    }
+
+    public synchronized Message getMessage(MessageRecallEvent event) {
+        for (MessageEvent e1 : events) {
+            MessageSource source = e1.getSource();
+            if (event.getMessageTime() == e1.getTime()) {
+                if (event.getMessageIds()[0] == source.getIds()[0]) {
+                    if (event.getMessageInternalIds()[0] == source.getInternalIds()[0])
+                        return e1.getMessage();
+                }
+            }
+        }
+        return null;
     }
 
     public Set<Contact> all(Bot bot) {
