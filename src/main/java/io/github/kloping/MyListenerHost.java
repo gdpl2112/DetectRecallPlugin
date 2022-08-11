@@ -37,7 +37,7 @@ public class MyListenerHost extends SimpleListenerHost implements Runnable {
 
     @Override
     public void run() {
-        int max = ConfigData.INSTANCE.getMil() * 60;
+        int max = DetectRecallPlugin.INSTANCE.configData.getMil() * 60;
         Iterator<MessageEvent> iterator = events.iterator();
         while (iterator.hasNext()) {
             MessageEvent event = iterator.next();
@@ -93,7 +93,7 @@ public class MyListenerHost extends SimpleListenerHost implements Runnable {
         Group group = event.getGroup();
         Member member = event.getOperator();
         if (PermissionService.hasPermission(new AbstractPermitteeId.ExactGroup(group.getId()), DetectRecallPlugin.INSTANCE.monitorPerm)) {
-            if (ConfigData.INSTANCE.getBlacklist().contains(group.getId())) return;
+//            if (ConfigData.INSTANCE.containsBlacklist(group.getId())) return;
             Message m0 = getMessage(event);
             if (m0 != null) {
                 MessageChainBuilder builder = new MessageChainBuilder();
@@ -111,7 +111,7 @@ public class MyListenerHost extends SimpleListenerHost implements Runnable {
     public void onMessage(MessageRecallEvent.FriendRecall event) {
         Friend friend = event.getAuthor();
         if (PermissionService.hasPermission(new AbstractPermitteeId.ExactFriend(friend.getId()), DetectRecallPlugin.INSTANCE.monitorPerm)) {
-            if (ConfigData.INSTANCE.getBlacklist().contains(friend.getId())) return;
+//            if (ConfigData.INSTANCE.containsBlacklist(friend.getId())) return;
             Message m0 = getMessage(event);
             if (m0 != null) {
                 MessageChainBuilder builder = new MessageChainBuilder();

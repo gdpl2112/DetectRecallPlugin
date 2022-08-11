@@ -41,5 +41,10 @@
             <artifactId>mirai-console-terminal</artifactId>
             <version>${mirai-version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.Kloping</groupId>
+            <artifactId>JvUtils</artifactId>
+            <version>0.4.6</version>
+        </dependency>
     </dependencies>
 </project>

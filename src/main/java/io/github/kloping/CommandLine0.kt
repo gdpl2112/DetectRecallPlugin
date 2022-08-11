@@ -19,15 +19,18 @@ class CommandLine0 private constructor() : JCompositeCommand(DetectRecallPlugin.
     @Description("设置撤回消息监听最大延时时间")
     @SubCommand("setMil")
     suspend fun CommandSender.detectRecallPluginSetMil(@Name("分钟") int: Int) {
-        ConfigData.mil = int;
+        DetectRecallPlugin.INSTANCE.configData.mil = int;
+        DetectRecallPlugin.INSTANCE.configData.apply()
         sendMessage("消息监听时长${int}分钟")
     }
 
     @Description("添加撤回监听黑名单")
     @SubCommand("addBlack")
     suspend fun CommandSender.detectRecallPluginAddBlack(@Name("id") id: Long) {
-        if (!ConfigData.blacklist.contains(id)) {
-            ConfigData.blacklist.add(id)
+        val configData = DetectRecallPlugin.INSTANCE.configData;
+        if (!configData.blacklist.contains(id)) {
+            configData.blacklist.add(id)
+            configData.apply()
             sendMessage("成功添加${id}至撤回监听黑名单")
         } else {
             sendMessage("重复添加")
@@ -37,8 +40,10 @@ class CommandLine0 private constructor() : JCompositeCommand(DetectRecallPlugin.
     @Description("移除撤回监听黑名单")
     @SubCommand("removeBlack")
     suspend fun CommandSender.detectRecallPluginRemoveBlack(@Name("id") id: Long) {
-        if (ConfigData.blacklist.contains(id)) {
-            ConfigData.blacklist.remove(id)
+        val configData = DetectRecallPlugin.INSTANCE.configData;
+        if (configData.blacklist.contains(id)) {
+            configData.blacklist.remove(id)
+            configData.apply()
             sendMessage("成功移除${id}从撤回监听黑名单")
         } else {
             sendMessage("从撤回监听黑名单未发现${id}")
