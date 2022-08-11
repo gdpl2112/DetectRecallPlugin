@@ -93,7 +93,7 @@ public class MyListenerHost extends SimpleListenerHost implements Runnable {
         Group group = event.getGroup();
         Member member = event.getOperator();
         if (PermissionService.hasPermission(new AbstractPermitteeId.ExactGroup(group.getId()), DetectRecallPlugin.INSTANCE.monitorPerm)) {
-//            if (ConfigData.INSTANCE.containsBlacklist(group.getId())) return;
+            if (DetectRecallPlugin.INSTANCE.configData.getBlacklist().contains(group.getId())) return;
             Message m0 = getMessage(event);
             if (m0 != null) {
                 MessageChainBuilder builder = new MessageChainBuilder();
@@ -111,7 +111,7 @@ public class MyListenerHost extends SimpleListenerHost implements Runnable {
     public void onMessage(MessageRecallEvent.FriendRecall event) {
         Friend friend = event.getAuthor();
         if (PermissionService.hasPermission(new AbstractPermitteeId.ExactFriend(friend.getId()), DetectRecallPlugin.INSTANCE.monitorPerm)) {
-//            if (ConfigData.INSTANCE.containsBlacklist(friend.getId())) return;
+            if (DetectRecallPlugin.INSTANCE.configData.getBlacklist().contains(friend.getId())) return;
             Message m0 = getMessage(event);
             if (m0 != null) {
                 MessageChainBuilder builder = new MessageChainBuilder();
