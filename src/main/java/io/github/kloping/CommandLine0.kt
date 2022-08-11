@@ -18,8 +18,30 @@ class CommandLine0 private constructor() : JCompositeCommand(DetectRecallPlugin.
 
     @Description("设置撤回消息监听最大延时时间")
     @SubCommand("setMil")
-    public suspend fun CommandSender.detectRecallPlugin(@Name("分钟") int: Int) {
+    suspend fun CommandSender.detectRecallPluginSetMil(@Name("分钟") int: Int) {
         ConfigData.mil = int;
         sendMessage("消息监听时长${int}分钟")
+    }
+
+    @Description("添加撤回监听黑名单")
+    @SubCommand("addBlack")
+    suspend fun CommandSender.detectRecallPluginAddBlack(@Name("id") id: Long) {
+        if (!ConfigData.blacklist.contains(id)) {
+            ConfigData.blacklist.add(id)
+            sendMessage("成功添加${id}至撤回监听黑名单")
+        } else {
+            sendMessage("重复添加")
+        }
+    }
+
+    @Description("移除撤回监听黑名单")
+    @SubCommand("removeBlack")
+    suspend fun CommandSender.detectRecallPluginRemoveBlack(@Name("id") id: Long) {
+        if (ConfigData.blacklist.contains(id)) {
+            ConfigData.blacklist.remove(id)
+            sendMessage("成功移除${id}从撤回监听黑名单")
+        } else {
+            sendMessage("从撤回监听黑名单未发现${id}")
+        }
     }
 }

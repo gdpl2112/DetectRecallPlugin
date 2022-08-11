@@ -8,4 +8,5 @@ import net.mamoe.mirai.console.data.value
  */
 object ConfigData : AutoSavePluginConfig("DetectRecallConfig") {
     var mil: Int by value(5)
+    val blacklist: java.util.ArrayList<Long> by value(ArrayList<Long>());
 }

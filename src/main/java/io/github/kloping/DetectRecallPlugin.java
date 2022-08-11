@@ -18,7 +18,7 @@ public class DetectRecallPlugin extends JavaPlugin {
     public static final DetectRecallPlugin INSTANCE = new DetectRecallPlugin();
 
     public DetectRecallPlugin() {
-        super(new JvmPluginDescriptionBuilder("io.github.kloping.DetectRecallPlugin", "1.0").info("监控撤回闪照").build());
+        super(new JvmPluginDescriptionBuilder("io.github.kloping.DetectRecallPlugin", "1.1").info("监控撤回闪照").build());
     }
 
     @Override
@@ -41,7 +41,7 @@ public class DetectRecallPlugin extends JavaPlugin {
         super.onEnable();
         this.reloadPluginConfig(ConfigData.INSTANCE);
         CommandManager.INSTANCE.registerCommand(CommandLine0.INSTANCE, true);
-        GlobalEventChannel.INSTANCE.registerListenerHost(new ListenHost());
+        GlobalEventChannel.INSTANCE.registerListenerHost(new MyListenerHost());
         receiver = new PermissionId("io.github.kloping.DetectRecallPlugin", "receiver");
         monitor = new PermissionId("io.github.kloping.DetectRecallPlugin", "monitor");
         try {

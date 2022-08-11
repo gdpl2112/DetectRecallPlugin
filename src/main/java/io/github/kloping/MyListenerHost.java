@@ -26,12 +26,12 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author github.kloping
  */
-public class ListenHost extends SimpleListenerHost implements Runnable {
+public class MyListenerHost extends SimpleListenerHost implements Runnable {
     private List<MessageEvent> events = new ArrayList<>();
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-    public ListenHost() {
+    public MyListenerHost() {
         scheduler.scheduleWithFixedDelay(this, 30, 30, TimeUnit.SECONDS);
     }
 
@@ -88,20 +88,12 @@ public class ListenHost extends SimpleListenerHost implements Runnable {
         }
     }
 
-    public FlashImage getFlashImage(MessageChain chain) {
-        for (SingleMessage singleMessage : chain) {
-            if (singleMessage instanceof FlashImage) {
-                return (FlashImage) singleMessage;
-            }
-        }
-        return null;
-    }
-
     @EventHandler
     public void onMessage(MessageRecallEvent.GroupRecall event) {
         Group group = event.getGroup();
         Member member = event.getOperator();
         if (PermissionService.hasPermission(new AbstractPermitteeId.ExactGroup(group.getId()), DetectRecallPlugin.INSTANCE.monitorPerm)) {
+            if (ConfigData.INSTANCE.getBlacklist().contains(group.getId())) return;
             Message m0 = getMessage(event);
             if (m0 != null) {
                 MessageChainBuilder builder = new MessageChainBuilder();
@@ -119,6 +111,7 @@ public class ListenHost extends SimpleListenerHost implements Runnable {
     public void onMessage(MessageRecallEvent.FriendRecall event) {
         Friend friend = event.getAuthor();
         if (PermissionService.hasPermission(new AbstractPermitteeId.ExactFriend(friend.getId()), DetectRecallPlugin.INSTANCE.monitorPerm)) {
+            if (ConfigData.INSTANCE.getBlacklist().contains(friend.getId())) return;
             Message m0 = getMessage(event);
             if (m0 != null) {
                 MessageChainBuilder builder = new MessageChainBuilder();
@@ -139,6 +132,15 @@ public class ListenHost extends SimpleListenerHost implements Runnable {
                     if (event.getMessageInternalIds()[0] == source.getInternalIds()[0])
                         return e1.getMessage();
                 }
+            }
+        }
+        return null;
+    }
+
+    public FlashImage getFlashImage(MessageChain chain) {
+        for (SingleMessage singleMessage : chain) {
+            if (singleMessage instanceof FlashImage) {
+                return (FlashImage) singleMessage;
             }
         }
         return null;
